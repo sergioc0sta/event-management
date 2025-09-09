@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -120,11 +121,32 @@ func (suite *EventDispatcherTestSuite) TestEventDispatcherHas() {
 	suite.Nil(err)
 	suite.Equal(2, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
 
-
 	assert.True(suite.T(), suite.eventDispatcher.Has(suite.event.GetName(), &suite.handler))
 	assert.True(suite.T(), suite.eventDispatcher.Has(suite.event.GetName(), &suite.handler2))
 	assert.False(suite.T(), suite.eventDispatcher.Has(suite.event2.GetName(), &suite.handler))
 }
+
+//for test event handler was call i need to create mock
+
+type MockHandler struct {
+	mock.Mock
+}
+
+func (m *MockHandler) Handler(event EventInterface ) {
+	m.Called(event)
+}
+
+func (suite *EventDispatcherTestSuite) TestEventDispatcherDispatcher() {
+	eh := &MockHandler{}
+	eh.On("Handler", &suite.event)
+
+	suite.eventDispatcher.Register(suite.event.GetName(), eh)
+	suite.eventDispatcher.Dispatch(&suite.event)
+
+	eh.AssertExpectations(suite.T())
+	eh.AssertNumberOfCalls(suite.T(), "Handler", 1)
+}
+
 func TestSuit(t *testing.T) {
 	suite.Run(t, new(EventDispatcherTestSuite))
 }

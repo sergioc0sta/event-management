@@ -16,7 +16,7 @@ type EventHandlerInterface interface {
 
 type EventDispatcherInterface interface {
 	Register(eventName string, handle EventHandlerInterface) error
-	Dispatch(handle EventHandlerInterface) error
+	Dispatch(event EventInterface) error
 	Remove(eventName string, handle EventHandlerInterface) error
 	Has(eventName string, handle EventHandlerInterface) bool
 	Clear() error
